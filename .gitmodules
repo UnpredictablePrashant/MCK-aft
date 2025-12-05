@@ -1,0 +1,15 @@
+[submodule "learn-terraform-aft-account-customizations"]
+	path = learn-terraform-aft-account-customizations
+	url = git@github.com:ravishmck/learn-terraform-aft-account-customizations.git
+[submodule "learn-terraform-aft-account-provisioning-customizations"]
+	path = learn-terraform-aft-account-provisioning-customizations
+	url = git@github.com:ravishmck/learn-terraform-aft-account-provisioning-customizations.git
+[submodule "learn-terraform-aft-account-request"]
+	path = learn-terraform-aft-account-request
+	url = git@github.com:ravishmck/learn-terraform-aft-account-request.git
+[submodule "learn-terraform-aft-global-customizations"]
+	path = learn-terraform-aft-global-customizations
+	url = git@github.com:ravishmck/learn-terraform-aft-global-customizations.git
+[submodule "learn-terraform-aws-control-tower-aft"]
+	path = learn-terraform-aws-control-tower-aft
+	url = https://github.com/hashicorp-education/learn-terraform-aws-control-tower-aft.git
