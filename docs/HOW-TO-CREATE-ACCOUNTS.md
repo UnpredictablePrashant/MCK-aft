@@ -6,11 +6,11 @@ This guide explains how to create new AWS accounts using the GitHub Actions work
 
 ### 1. Go to GitHub Actions
 
-Navigate to: **[GitHub Actions](https://github.com/UnpredictablePrashant/MCK-aft/actions)**
+Navigate to: **[GitHub Actions](https://github.com/ravishmck/learn-terraform-aft-account-request/actions)**
 
 ### 2. Run the Workflow
 
-1. Click on **"🚀 Create New AWS Account"** in the left sidebar
+1. Click on **"🚀 Create AWS Account Request"** in the left sidebar
 2. Click the **"Run workflow"** button
 3. Fill in the form:
    - **Account Name**: e.g., `DevAccount`, `ProdAccount`

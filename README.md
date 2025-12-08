@@ -4,6 +4,16 @@ Complete AWS Account Factory for Terraform (AFT) implementation for automated AW
 
 ## 🚀 Quick Start
 
+### Create New AWS Account
+
+**👉 Go to:** https://github.com/ravishmck/learn-terraform-aft-account-request/actions
+
+1. Click **"🚀 Create AWS Account Request"**
+2. Click **"Run workflow"** → Fill the 4-field form
+3. Wait ~20 minutes → Account appears in Organizations!
+
+[**📖 Full Guide**](docs/HOW-TO-CREATE-ACCOUNTS.md)
+
 ### Check Account Status
 
 ```bash
