@@ -1,310 +1,227 @@
-# MCK-AFT: AWS Account Factory for Terraform
+# AWS Account Factory for Terraform (AFT)
 
-Complete AWS Account Factory for Terraform (AFT) implementation for automated AWS account provisioning and management.
+Automated AWS account provisioning using Control Tower and Terraform - optimized for cost efficiency and ease of use.
 
-## 🚀 Quick Start
+## 🎯 Quick Start
 
-### Create New AWS Account
+### Create Single Account
+1. Go to: [Create Account Workflow](https://github.com/ravishmck/learn-terraform-aft-account-request/actions/workflows/create-account.yml)
+2. Click "Run workflow"
+3. Fill in account details
+4. ✅ Account created in ~20 minutes with $200 budget
 
-**👉 Go to:** https://github.com/ravishmck/learn-terraform-aft-account-request/actions
+### Create Multiple Accounts (Bulk)
+1. Go to: [Bulk Creation Workflow](https://github.com/ravishmck/learn-terraform-aft-account-request/actions/workflows/create-bulk-accounts-csv.yml)
+2. Click "Run workflow"  
+3. Enter CSV format: `Name,Email,OU,Environment`
+4. ✅ All accounts created in ~20 minutes
 
-1. Click **"🚀 Create AWS Account Request"**
-2. Click **"Run workflow"** → Fill the 4-field form
-3. Wait ~20 minutes → Account appears in Organizations!
-
-[**📖 Full Guide**](docs/HOW-TO-CREATE-ACCOUNTS.md)
-
-### Check Account Status
-
-```bash
-./scripts/check-account-status.sh
-```
-
-### Monitor AFT
-
-- **CodePipeline**: https://ap-south-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/ct-aft-account-request/view
-- **Step Functions**: https://ap-south-1.console.aws.amazon.com/states/home?region=ap-south-1
-- **Organizations**: https://console.aws.amazon.com/organizations/v2/home/accounts
-
----
-
-## 📁 Repository Structure
-
-```
-MCK-aft/
-├── docs/                              # Documentation
-│   ├── AFT-AUTOMATION-SUMMARY.md      # Complete setup guide
-│   └── GITHUB-ACTIONS-QUICKSTART.md   # Quick reference
-│
-├── scripts/                           # Utility scripts
-│   └── check-account-status.sh        # Account provisioning status
-│
-├── learn-terraform-aft-account-request/
-│   └── terraform/                     # Account request definitions
-│
-├── learn-terraform-aft-account-customizations/
-│   └── sandbox/                       # Account-specific customizations
-│
-├── learn-terraform-aft-account-provisioning-customizations/
-│   └── terraform/                     # Provisioning customizations
-│
-├── learn-terraform-aft-global-customizations/
-│   └── terraform/                     # Global customizations for all accounts
-│
-└── learn-terraform-aws-control-tower-aft/
-    ├── main.tf                        # AFT infrastructure
-    ├── backend.tf                     # Terraform state configuration
-    └── terraform.tfvars               # AFT configuration values
-```
-
----
-
-## 🎯 What is AFT?
-
-AWS Account Factory for Terraform (AFT) provides a GitOps-based approach to:
-- **Automate** AWS account provisioning
-- **Standardize** account configurations
-- **Manage** account customizations at scale
-- **Audit** account creation and changes
-
-### Key Components
-
-| Component | Purpose |
-|-----------|---------|
-| **Control Tower AFT** | Core AFT infrastructure (436 resources) |
-| **Account Request** | Define new AWS accounts to provision |
-| **Global Customizations** | Apply to ALL accounts |
-| **Account Customizations** | Apply to specific accounts |
-| **Provisioning Customizations** | Run during account creation |
-
----
-
-## 🏗️ Architecture
-
-### Accounts
-
-| Account | Account ID | Purpose |
-|---------|------------|---------|
-| **CT Management** | 535355705679 | Control Tower management |
-| **AFT Management** | 809574937450 | AFT infrastructure |
-| **Log Archive** | 180574905686 | Centralized logging |
-| **Audit** | 002506421448 | Security and compliance |
-
-### AFT Workflow
-
-```
-1. Account Request (Git Commit)
-   ↓
-2. CodePipeline Triggered
-   ↓
-3. Terraform Apply → DynamoDB
-   ↓
-4. EventBridge Scheduler (5 min)
-   ↓
-5. Lambda Processor
-   ↓
-6. Step Functions Execution
-   ↓
-7. Control Tower Account Creation
-   ↓
-8. AFT Customizations Applied
-   ↓
-9. Account Ready! ✅
-```
-
----
-
-## 📋 Creating Account Requests
-
-### Method 1: Edit main.tf Directly
-
-```bash
-cd learn-terraform-aft-account-request/terraform
-vi main.tf
-```
-
-Add a new module block:
-
-```hcl
-module "my_new_account" {
-  source = "./modules/aft-account-request"
-
-  control_tower_parameters = {
-    AccountEmail              = "unique-email@example.com"
-    AccountName               = "MyNewAccount"
-    ManagedOrganizationalUnit = "AFTLearn"
-    SSOUserEmail              = "admin@example.com"
-    SSOUserFirstName          = "Admin"
-    SSOUserLastName           = "User"
-  }
-
-  account_tags = {
-    "Environment" = "Dev"
-    "ManagedBy"   = "AFT"
-  }
-
-  change_management_parameters = {
-    change_requested_by = "Your Name"
-    change_reason       = "Development environment"
-  }
-
-  custom_fields = {
-    group = "engineering"
-  }
-
-  account_customizations_name = "sandbox"
-}
-```
-
-### Method 2: Use Status Checker
-
-Monitor account provisioning progress:
-
-```bash
-./scripts/check-account-status.sh
-```
-
----
-
-## ⚙️ Configuration
-
-### AWS Credentials
-
-AFT uses the `ct-mgmt` AWS CLI profile:
-
-```bash
-export AWS_PROFILE=ct-mgmt
-aws sts get-caller-identity
-```
-
-### Terraform Backend
-
-State stored in S3 with DynamoDB locking:
-- **Bucket**: `mck-aft-terraform-state-535355705679`
-- **Table**: `mck-aft-terraform-state-lock`
-- **Region**: `ap-south-1`
-
----
-
-## 🔍 Monitoring & Troubleshooting
-
-### Check Account Status
-
-```bash
-./scripts/check-account-status.sh
-```
-
-### View CloudWatch Logs
-
-```bash
-aws logs tail /aws/lambda/aft-account-request-processor --follow --region ap-south-1
-```
-
-### Common Issues
-
-**Account not appearing?**
-1. Check DynamoDB: `aft-request` table
-2. Verify Step Functions executions
-3. Check CloudWatch Logs for errors
-4. Confirm OU exists in Organizations
-
-**Pipeline not triggering?**
-- AFT uses EventBridge schedulers (every 5 minutes)
-- Manually trigger: `aws codepipeline start-pipeline-execution --name ct-aft-account-request --region ap-south-1`
+### Close Account
+1. Go to: [Close Account Workflow](https://github.com/ravishmck/learn-terraform-aft-account-request/actions/workflows/close-account.yml)
+2. Click "Run workflow"
+3. Enter account details
+4. ✅ Account decommissioned
 
 ---
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [AFT Automation Summary](docs/AFT-AUTOMATION-SUMMARY.md) | Complete setup and troubleshooting guide |
-| [GitHub Actions Guide](docs/GITHUB-ACTIONS-QUICKSTART.md) | Workflow automation reference |
-| [Status Checker Script](scripts/check-account-status.sh) | Monitor account provisioning |
+| Guide | Description |
+|-------|-------------|
+| [How to Create Accounts](docs/HOW-TO-CREATE-ACCOUNTS.md) | Step-by-step single account creation |
+| [Bulk Account Creation](docs/BULK-ACCOUNT-CREATION.md) | Create multiple accounts at once |
+| [How to Close Accounts](docs/HOW-TO-CLOSE-ACCOUNTS.md) | Decommission accounts |
+| [Cost Control Setup](docs/COST-CONTROL-SETUP.md) | $200 budget & SCP enforcement |
+| [Get AWS Credentials](docs/GET-AWS-CREDENTIALS.md) | Set up CLI access |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and fixes |
 
 ---
 
-## 🚦 Account Provisioning Timeline
+## 🏗️ Architecture
 
-| Time | Status |
-|------|--------|
-| 0 min | Request committed to Git |
-| 5 min | CodePipeline completes |
-| 10 min | AFT detects request |
-| 15 min | Step Functions starts |
-| 45 min | **Account fully provisioned** ✅ |
+### Cost-Optimized Design
+- ✅ **No NAT Gateways** - Saves ~$768/year
+- ✅ **No VPC for Lambda/CodeBuild** - Free AWS internet access
+- ✅ **$200/month budget per account** - Automatic alerts
+- ✅ **Service Control Policies** - Prevent expensive services
 
----
+### Workflow
+```
+GitHub → CodePipeline → CodeBuild → DynamoDB → Lambda → Service Catalog → Account (ACTIVE)
+         (Auto every 2min)  (No VPC!)              (No VPC!)
+```
 
-## 🔐 Security Notes
-
-- All AWS credentials stored in `~/.aws/credentials`
-- IAM roles use least-privilege permissions
-- State files encrypted at rest (S3 + KMS)
-- DynamoDB tables have encryption enabled
-- CloudTrail logs all API activity
+[Architecture Details](docs/AFT-ARCHITECTURE-NO-NAT.md) | [NAT Removal Guide](docs/NAT-GATEWAY-REMOVAL-GUIDE.md)
 
 ---
 
-## 🆘 Support & Resources
+## 💰 Cost Control
 
-### AWS Console Links
+Every account automatically gets:
+- ✅ $200 monthly budget limit
+- ✅ Email alerts at 80%, 90%, 100%
+- ✅ Forecasted spending alerts
+- ⚠️ Optional SCP to block expensive services
 
-**AFT Management Account (809574937450)**
+[Full Cost Control Guide](docs/COST-CONTROL-SETUP.md)
+
+---
+
+## 🔧 Available OUs
+
+- **LearnMck** - Learning/Training accounts
+- **Sandbox** - Experimentation/Dev
+- **Batch14** - Student batch 14
+- **Batch15** - Student batch 15  
+- **AFT-Lab-Rajesh** - Lab environment
+- **Security** - Security tools
+- **SuspendedAccount** - Archived accounts
+
+---
+
+## 📊 What Gets Created
+
+When you request an account, AFT automatically:
+1. ✅ Creates AWS account via Control Tower
+2. ✅ Sets up SSO access
+3. ✅ Configures $200 monthly budget
+4. ✅ Applies baseline security (Control Tower)
+5. ✅ Runs customizations (if configured)
+6. ✅ Sends you email alerts
+7. ✅ Makes account ACTIVE (~20 minutes)
+
+---
+
+## 🚀 Features
+
+### Automated Workflows
+- ✅ Single account creation via GitHub Actions
+- ✅ Bulk account creation (CSV format)
+- ✅ Account decommissioning
+- ✅ Auto-trigger on git push (every 2 minutes)
+- ✅ End-to-end monitoring
+
+### Cost Management  
+- ✅ $200 budget per account (automatic)
+- ✅ Email alerts at thresholds
+- ✅ Service Control Policies (optional)
+- ✅ No NAT Gateway costs
+
+### Easy to Use
+- ✅ GitHub Actions UI (no CLI needed)
+- ✅ Copy-paste from Excel for bulk creation
+- ✅ Comprehensive documentation
+- ✅ Troubleshooting guides
+
+---
+
+## 🛠️ Technical Details
+
+### Repositories
+- **Main**: MCK-aft (this repo)
+- **Account Requests**: [learn-terraform-aft-account-request](https://github.com/ravishmck/learn-terraform-aft-account-request)
+- **Account Customizations**: learn-terraform-aft-account-customizations
+- **Global Customizations**: learn-terraform-aft-global-customizations
+
+### AWS Accounts
+- **Management**: 535355705679 (HV_academics)
+- **AFT Management**: 809574937450 (AFTLearn)
+- **Log Archive**: 180574905686
+- **Audit**: 002506421448
+
+### Key Components
+- **CodePipeline**: ct-aft-account-request (auto-triggers every 2 min)
+- **DynamoDB**: aft-request table
+- **Step Functions**: aft-account-provisioning-framework
+- **Lambda Functions**: 17 functions (all without VPC)
+
+---
+
+## 📞 Quick Links
+
+- [GitHub Actions Workflows](https://github.com/ravishmck/learn-terraform-aft-account-request/actions)
 - [CodePipeline](https://ap-south-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/ct-aft-account-request/view)
-- [Step Functions](https://ap-south-1.console.aws.amazon.com/states/home?region=ap-south-1)
-- [DynamoDB Tables](https://ap-south-1.console.aws.amazon.com/dynamodbv2/home?region=ap-south-1)
-- [Lambda Functions](https://ap-south-1.console.aws.amazon.com/lambda/home?region=ap-south-1#/functions)
-
-**CT Management Account (535355705679)**
+- [DynamoDB Table](https://ap-south-1.console.aws.amazon.com/dynamodbv2/home?region=ap-south-1#table?name=aft-request)
 - [AWS Organizations](https://console.aws.amazon.com/organizations/v2/home/accounts)
-- [Control Tower](https://console.aws.amazon.com/controltower/home)
-
-### External Resources
-
-- [AWS AFT Documentation](https://docs.aws.amazon.com/controltower/latest/userguide/aft-getting-started.html)
-- [AFT GitHub Repository](https://github.com/aws-ia/terraform-aws-control_tower_account_factory)
-- [Control Tower Guide](https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html)
 
 ---
 
-## 🔄 Maintenance
+## 🎓 Common Use Cases
 
-### Update AFT Infrastructure
+### Student Batch Creation
+Create 20+ accounts for a training batch in one go:
+```csv
+Batch14Student01,student01@training.com,Batch14,Development
+Batch14Student02,student02@training.com,Batch14,Development
+...
+```
+[Bulk Creation Guide](docs/BULK-ACCOUNT-CREATION.md)
 
+### Multi-Environment Setup
+Create Dev, Test, Staging, Prod accounts:
+```csv
+ProjectX-Dev,proj+dev@company.com,Sandbox,Development
+ProjectX-Test,proj+test@company.com,Sandbox,Testing
+ProjectX-Stage,proj+stage@company.com,LearnMck,Staging
+ProjectX-Prod,proj+prod@company.com,LearnMck,Production
+```
+
+### Team Sandboxes
+Give each team member their own AWS account for experimentation.
+
+---
+
+## 🔍 Monitoring
+
+### Account Creation Progress
+1. **GitHub Actions** - See workflow status
+2. **CodePipeline** - Monitor terraform apply
+3. **DynamoDB** - Check if request was recorded
+4. **Organizations** - See when account becomes ACTIVE
+
+### Typical Timeline
+- 0-2 min: Request pushed to GitHub
+- 2-5 min: CodePipeline runs terraform apply
+- 5-10 min: DynamoDB entry created, Lambda triggered
+- 10-20 min: Account created and ACTIVE
+
+---
+
+## ⚙️ Maintenance
+
+### Update AFT
 ```bash
 cd learn-terraform-aws-control-tower-aft
-terraform plan
+git pull
 terraform apply
 ```
 
-### Update Submodules
-
+### Apply SCP (One-time)
 ```bash
-git submodule update --remote
+bash scripts/apply-scp.sh
 ```
 
-### Backup State
-
-State is automatically versioned in S3 with 30-day retention.
-
----
-
-## 👥 Contributors
-
-Maintained by the DevOps Team
+### Increase Account Limit
+See [Service Quota Increase Guide](docs/SERVICE-QUOTA-INCREASE.md)
 
 ---
 
-## 📝 Version History
+## 📖 Additional Resources
 
-- **v1.0.0** - Initial AFT deployment (436 resources)
-- **v1.1.0** - Added EventBridge automation
-- **v1.2.0** - Lambda layer fixes and IAM improvements
+- [AFT Fix Summary](docs/AFT-FIX-SUMMARY.md) - What was fixed (Lambda VPC removal, etc.)
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues
+- [AWS AFT Official Docs](https://docs.aws.amazon.com/controltower/latest/userguide/aft-overview.html)
 
 ---
 
-**Last Updated**: December 5, 2025  
-**AFT Version**: 1.17.0  
-**Terraform Version**: Latest compatible  
-**AWS Region**: ap-south-1 (primary), us-east-1 (secondary)
+## 🎉 Summary
+
+This AFT setup provides:
+- ✅ **Automated** account creation via GitHub Actions
+- ✅ **Cost-optimized** with no NAT Gateway (~$768/year savings)
+- ✅ **Budget-protected** with $200/month limits
+- ✅ **Easy to use** with simple workflows
+- ✅ **Bulk capable** for student batches or teams
+- ✅ **Well-documented** with comprehensive guides
+
+**Start creating accounts now:** [GitHub Actions Workflows](https://github.com/ravishmck/learn-terraform-aft-account-request/actions)

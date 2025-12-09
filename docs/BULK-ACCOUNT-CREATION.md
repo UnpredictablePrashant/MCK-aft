@@ -6,21 +6,19 @@ Create **multiple AWS accounts at once** using GitHub Actions workflows. Perfect
 
 ---
 
-## 📋 Available Workflows
+## 📋 Bulk Account Creation Workflow
 
-### 1. **CSV Format** (Easiest!) ⭐ Recommended
-**Best for:** Quick bulk creation, copying from spreadsheets
+**Workflow:** `create-bulk-accounts-csv.yml` (CSV Format)
 
-**Workflow:** `create-bulk-accounts-csv.yml`
-
-### 2. **JSON Format** (Advanced)
-**Best for:** Programmatic creation, complex configurations
-
-**Workflow:** `create-bulk-accounts.yml`
+**Perfect for:** 
+- Quick bulk creation
+- Copying from spreadsheets (Excel, Google Sheets)
+- Student batch provisioning
+- Team sandbox creation
 
 ---
 
-## 🎯 Method 1: CSV Format (Recommended)
+## 🎯 How to Use
 
 ### Step 1: Go to the Workflow
 ```
@@ -60,47 +58,6 @@ ProdAccount,prod+aws@example.com,LearnMck,Production
 ### Step 4: Click "Run workflow"
 
 ✅ **Done!** All accounts will be created automatically.
-
----
-
-## 🎯 Method 2: JSON Format (Advanced)
-
-### Step 1: Go to the Workflow
-```
-https://github.com/ravishmck/learn-terraform-aft-account-request/actions/workflows/create-bulk-accounts.yml
-```
-
-### Step 2: Click "Run workflow"
-
-### Step 3: Enter Accounts in JSON Format
-
-**Example:**
-```json
-[
-  {
-    "name": "Student1Account",
-    "email": "student1+aws@example.com",
-    "ou": "Batch14",
-    "environment": "Development"
-  },
-  {
-    "name": "Student2Account",
-    "email": "student2+aws@example.com",
-    "ou": "Batch14",
-    "environment": "Development"
-  },
-  {
-    "name": "DevAccount",
-    "email": "dev+aws@example.com",
-    "ou": "Sandbox",
-    "environment": "Development"
-  }
-]
-```
-
-### Step 4: Click "Run workflow"
-
-✅ **Done!**
 
 ---
 
@@ -317,33 +274,33 @@ Choose the OU (Batch14, Batch15, etc.) to protect all accounts in that OU.
 
 ## 📊 Comparison: Single vs Bulk
 
-| Feature | Single Account | Bulk CSV | Bulk JSON |
-|---------|---------------|----------|-----------|
-| **Accounts per run** | 1 | Unlimited | Unlimited |
-| **Data format** | Form fields | CSV | JSON |
-| **Easy to use** | ✅✅✅ | ✅✅ | ✅ |
-| **Copy from Excel** | ❌ | ✅✅✅ | ❌ |
-| **Programmatic** | ❌ | ❌ | ✅✅✅ |
-| **Error prone** | Low | Low | Medium |
-| **Best for** | Quick test | Batches, teams | Automation |
+| Feature | Single Account | Bulk CSV |
+|---------|---------------|----------|
+| **Accounts per run** | 1 | Unlimited |
+| **Data format** | Form fields | CSV |
+| **Easy to use** | ✅✅✅ | ✅✅✅ |
+| **Copy from Excel** | ❌ | ✅✅✅ |
+| **Time to create 10 accounts** | ~200 min (one at a time) | ~20 min (parallel) |
+| **Best for** | Single quick tests | Batches, teams, multi-environment |
 
 ---
 
 ## 🎯 Quick Reference
 
-### CSV Workflow URL
+### Workflow URL
 ```
 https://github.com/ravishmck/learn-terraform-aft-account-request/actions/workflows/create-bulk-accounts-csv.yml
-```
-
-### JSON Workflow URL
-```
-https://github.com/ravishmck/learn-terraform-aft-account-request/actions/workflows/create-bulk-accounts.yml
 ```
 
 ### CSV Format
 ```
 Name,Email,OU,Environment
+```
+
+### Example
+```csv
+Student1,student1@example.com,Batch14,Development
+Student2,student2@example.com,Batch14,Development
 ```
 
 ### Available OUs
