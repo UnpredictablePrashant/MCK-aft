@@ -169,3 +169,5 @@ echo "🗑️  To remove:"
 echo "   aws organizations detach-policy --policy-id $POLICY_ID --target-id $OU_ID --profile ct-mgmt"
 echo ""
 
+
+
